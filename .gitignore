@@ -1,6 +1,12 @@
 # GoLand configs
 .idea
 
+# Editor backup files
+**/*~
+**/\#*\#
+*~
+\#*\#
+
 # Binaries for programs and plugins
 *.exe
 *.exe~
