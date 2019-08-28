@@ -1,9 +1,10 @@
 package main
 
 import (
-	"fmt"
+	"bufio"
+	//"fmt"
+	//"io"
 	"os"
-	"os/exec"
 	"time"
 )
 
@@ -19,7 +20,7 @@ type Shape struct {
 }
 
 type Game struct {
-	clearCmd *exec.Cmd
+	out *bufio.Writer
 	shapeLoc Coord
 	floorTop int8
 	floor    [10]int8
@@ -27,36 +28,37 @@ type Game struct {
 }
 
 func (game Game) drawFrame() {
-	game.clearCmd.Run()
+	game.out.WriteString("\033[2J\033[H")
 
-	fmt.Print("+==========+\n")
+	game.out.WriteString("+==========+\n")
 	for y, _ := range game.filled {
 		y := int8(y)
 		if int8(y) < game.shapeLoc.y || (int8(y) > game.shapeLoc.y && y < game.floorTop) {
-			fmt.Println("|          |")
+			game.out.WriteString("|          |\n")
 			continue
 		}
 
-		fmt.Print("|")
+		game.out.WriteString("|")
 		for x, element := range game.filled[y] {
 			x := int8(x)
 			if x == game.shapeLoc.x && y == game.shapeLoc.y {
-				fmt.Print("k")
+				game.out.WriteString("k")
 			} else if element != 0 {
-				fmt.Print("+")
+				game.out.WriteString("+")
 			} else {
-				fmt.Print(" ")
+				game.out.WriteString(" ")
 			}
 		}
-		fmt.Print("|\n")
+		game.out.WriteString("|\n")
 	}
 
-	fmt.Print("+==========+\n")
+	game.out.WriteString("+==========+\n")
+	game.out.Flush()
 }
 
 func main() {
 	game := Game{
-		clearCmd: exec.Command("clear"),
+		out: bufio.NewWriterSize(os.Stdout, 1000),
 		shapeLoc: Coord{
 			x: 0,
 			y: 0,
@@ -65,8 +67,6 @@ func main() {
 		floor:    [10]int8{},
 		filled:   [20][10]int8{},
 	}
-
-	game.clearCmd.Stdout = os.Stdout
 
 	for {
 		for j := 0; j < 20; j++ {
