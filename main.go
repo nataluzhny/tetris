@@ -15,13 +15,17 @@ type Coord struct {
 	y int8
 }
 
-type Shape struct {
-	bool
+type Shape interface {
+	x() int8
+	y() int8
+	size() int8
+	rotate()
 }
 
 type Game struct {
-	out *bufio.Writer
+	out      *bufio.Writer
 	shapeLoc Coord
+	shape    Shape
 	floorTop int8
 	floor    [10]int8
 	filled   [20][10]int8
