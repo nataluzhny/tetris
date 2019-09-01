@@ -2,13 +2,24 @@ package main
 
 import (
 	"bufio"
-	//"fmt"
+	"fmt"
+	"github.com/nsf/termbox-go"
 	//"io"
 	"os"
 	"time"
 )
 
 const boardsize int = 200
+
+func getkeyboardinput() {
+	for {
+		ev := termbox.PollEvent()
+		if ev.Type == termbox.EventKey {
+			fmt.Print("blah")
+		}
+	}
+
+}
 
 type Coord struct {
 	x int8
@@ -61,6 +72,8 @@ func (game Game) drawFrame() {
 }
 
 func main() {
+	go getkeyboardinput()
+
 	game := Game{
 		out: bufio.NewWriterSize(os.Stdout, 1000),
 		shapeLoc: Coord{
