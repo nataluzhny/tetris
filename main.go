@@ -8,23 +8,20 @@ import (
 	"time"
 )
 
-func (game *Game) getKeyboardInput() {
-	for {
-		game.out.WriteString("About to Poll event...")
-		game.out.Flush()
+func (game *Game) getKeyboardInput(done chan bool) {
+	termbox.Init()
 
+	for {
 		ev := termbox.PollEvent()
 
-		game.out.WriteString("About to Poll event...")
-		game.out.Flush()
-
 		if ev.Type == termbox.EventKey {
-			game.out.WriteString(fmt.Sprintf("Event Key detected: ", ev.Key))
+			if ev.Key == termbox.KeyCtrlC {
+				done <- true
+			}
+
+			game.out.WriteString(fmt.Sprintf("Event Key detected: ", ev.Ch))
 			game.out.Flush()
 		}
-
-		game.out.WriteString("Event polled.")
-		game.out.Flush()
 	}
 }
 
@@ -90,12 +87,22 @@ func main() {
 		filled:   [20][10]int8{},
 	}
 
-	go game.getKeyboardInput()
+	done := make(chan bool)
+	go game.getKeyboardInput(done)
 
 	for {
 		for j := 0; j < 20; j++ {
 			// game.drawFrame()
 			time.Sleep(time.Millisecond * 30)
+
+			select {
+			case _, ok := <- done:
+				if ok {
+					return
+				}
+			default:
+				// Do nothing!
+			}
 		}
 
 		if game.shapeLoc.y < 19 {
