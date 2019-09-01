@@ -11,7 +11,7 @@ import (
 
 const boardsize int = 200
 
-func getkeyboardinput() {
+func getKeyboardInput() {
 	for {
 		ev := termbox.PollEvent()
 		if ev.Type == termbox.EventKey {
@@ -72,7 +72,7 @@ func (game Game) drawFrame() {
 }
 
 func main() {
-	go getkeyboardinput()
+	go getKeyboardInput()
 
 	game := Game{
 		out: bufio.NewWriterSize(os.Stdout, 1000),
