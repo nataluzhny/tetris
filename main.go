@@ -8,14 +8,24 @@ import (
 	"time"
 )
 
-func getKeyboardInput() {
+func (game *Game) getKeyboardInput() {
 	for {
-		ev := termbox.PollEvent()
-		if ev.Type == termbox.EventKey {
-			fmt.Print("blah")
-		}
-	}
+		game.out.WriteString("About to Poll event...")
+		game.out.Flush()
 
+		ev := termbox.PollEvent()
+
+		game.out.WriteString("About to Poll event...")
+		game.out.Flush()
+
+		if ev.Type == termbox.EventKey {
+			game.out.WriteString(fmt.Sprintf("Event Key detected: ", ev.Key))
+			game.out.Flush()
+		}
+
+		game.out.WriteString("Event polled.")
+		game.out.Flush()
+	}
 }
 
 type Coord struct {
@@ -69,8 +79,6 @@ func (game Game) drawFrame() {
 }
 
 func main() {
-	go getKeyboardInput()
-
 	game := Game{
 		out: bufio.NewWriterSize(os.Stdout, 1000),
 		shapeLoc: Coord{
@@ -82,9 +90,11 @@ func main() {
 		filled:   [20][10]int8{},
 	}
 
+	go game.getKeyboardInput()
+
 	for {
 		for j := 0; j < 20; j++ {
-			game.drawFrame()
+			// game.drawFrame()
 			time.Sleep(time.Millisecond * 30)
 		}
 
