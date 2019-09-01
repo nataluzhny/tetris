@@ -4,12 +4,9 @@ import (
 	"bufio"
 	"fmt"
 	"github.com/nsf/termbox-go"
-	//"io"
 	"os"
 	"time"
 )
-
-const boardsize int = 200
 
 func getKeyboardInput() {
 	for {
