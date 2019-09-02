@@ -8,15 +8,23 @@ import (
 	"time"
 )
 
-func (game *Game) getKeyboardInput(done chan bool) {
-	termbox.Init()
+type Event int
 
+const (
+	Quit = iota
+	Left
+	Right
+	Rotate
+)
+
+func (game *Game) getKeyboardInput(eventChan chan bool) {
 	for {
 		ev := termbox.PollEvent()
 
 		if ev.Type == termbox.EventKey {
+
 			if ev.Key == termbox.KeyCtrlC {
-				done <- true
+				eventChan <- true
 			}
 
 			game.out.WriteString(fmt.Sprintf("Event Key detected: ", ev.Ch))
@@ -76,6 +84,9 @@ func (game Game) drawFrame() {
 }
 
 func main() {
+	termbox.Init()
+	defer termbox.Close()
+
 	game := Game{
 		out: bufio.NewWriterSize(os.Stdout, 1000),
 		shapeLoc: Coord{
@@ -87,21 +98,23 @@ func main() {
 		filled:   [20][10]int8{},
 	}
 
-	done := make(chan bool)
-	go game.getKeyboardInput(done)
+	inputs := make(chan bool)
+	go game.getKeyboardInput(inputs)
 
 	for {
 		for j := 0; j < 20; j++ {
 			// game.drawFrame()
 			time.Sleep(time.Millisecond * 30)
 
-			select {
-			case _, ok := <- done:
-				if ok {
-					return
+			for {
+				select {
+				case _, ok := <- inputs:
+					if ok {
+						return
+					}
+				default:
+					break
 				}
-			default:
-				// Do nothing!
 			}
 		}
 
