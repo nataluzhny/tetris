@@ -2,7 +2,6 @@ package main
 
 import (
 	"bufio"
-	"fmt"
 	"github.com/nsf/termbox-go"
 	"os"
 	"time"
@@ -17,18 +16,23 @@ const (
 	Rotate
 )
 
-func (game *Game) getKeyboardInput(eventChan chan bool) {
+func (game *Game) getKeyboardInput(eventChan chan int) {
 	for {
 		ev := termbox.PollEvent()
 
 		if ev.Type == termbox.EventKey {
-
-			if ev.Key == termbox.KeyCtrlC {
-				eventChan <- true
+			switch ev.Key {
+			case termbox.KeyCtrlC:
+				eventChan <- 1
+			case termbox.KeyArrowLeft:
+				eventChan <- 2
+				//game.moveLeft()
+			case termbox.KeyArrowRight:
+				game.moveRight()
 			}
 
-			game.out.WriteString(fmt.Sprintf("Event Key detected: ", ev.Ch))
-			game.out.Flush()
+			//game.out.WriteString(fmt.Sprintf("Event Key detected: ", ev.Ch))
+			//game.out.Flush()
 		}
 	}
 }
@@ -51,14 +55,26 @@ type Game struct {
 	shape    Shape
 	floorTop int8
 	floor    [10]int8
-	filled   [20][10]int8
+	board    [20][10]int8
+}
+
+func (game Game) moveLeft() {
+	game.shapeLoc.x--
+}
+
+func (game Game) moveRight() {
+	game.shapeLoc.x++
+}
+
+func (game Game) drop() {
+
 }
 
 func (game Game) drawFrame() {
 	game.out.WriteString("\033[2J\033[H")
 
 	game.out.WriteString("+==========+\n")
-	for y, _ := range game.filled {
+	for y, _ := range game.board {
 		y := int8(y)
 		if int8(y) < game.shapeLoc.y || (int8(y) > game.shapeLoc.y && y < game.floorTop) {
 			game.out.WriteString("|          |\n")
@@ -66,7 +82,7 @@ func (game Game) drawFrame() {
 		}
 
 		game.out.WriteString("|")
-		for x, element := range game.filled[y] {
+		for x, element := range game.board[y] {
 			x := int8(x)
 			if x == game.shapeLoc.x && y == game.shapeLoc.y {
 				game.out.WriteString("k")
@@ -95,27 +111,41 @@ func main() {
 		},
 		floorTop: 0,
 		floor:    [10]int8{},
-		filled:   [20][10]int8{},
+		board:    [20][10]int8{},
 	}
 
-	inputs := make(chan bool)
+	inputs := make(chan int)
 	go game.getKeyboardInput(inputs)
 
 	for {
 		for j := 0; j < 20; j++ {
-			// game.drawFrame()
+			game.drawFrame()
 			time.Sleep(time.Millisecond * 30)
 
 			for {
 				select {
-				case _, ok := <- inputs:
+				case x, ok := <-inputs:
 					if ok {
-						return
+						switch x {
+						case 1:
+							return
+						case 2:
+							game.shapeLoc.x++
+						}
 					}
 				default:
-					break
+					goto EndFor
+					//}
+					//input := <- inputs
+					//switch input{
+					//case 1:
+					//	return
+					//case 2:
+					//	game.shapeLoc.x++
+					//case
 				}
 			}
+		EndFor:
 		}
 
 		if game.shapeLoc.y < 19 {
