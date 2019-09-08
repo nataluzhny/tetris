@@ -84,6 +84,10 @@ func (game Game) drawFrame() {
 }
 
 func main() {
+	initLogger()
+	defer closeLogger()
+
+	logger.Log("Initializing Termbox...")
 	termbox.Init()
 	defer termbox.Close()
 
@@ -101,6 +105,8 @@ func main() {
 	inputs := make(chan bool)
 	go game.getKeyboardInput(inputs)
 
+	logger.Log("Starting game loop...")
+
 	for {
 		for j := 0; j < 20; j++ {
 			// game.drawFrame()
@@ -108,7 +114,7 @@ func main() {
 
 			for {
 				select {
-				case _, ok := <- inputs:
+				case _, ok := <-inputs:
 					if ok {
 						return
 					}
