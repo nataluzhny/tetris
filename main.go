@@ -7,28 +7,31 @@ import (
 	"time"
 )
 
-type Event int
+type KeyboardEvent int
 
 const (
-	Quit = iota
+	Quit KeyboardEvent = iota
 	Left
 	Right
 	Rotate
+	Drop
 )
 
-func (game *Game) getKeyboardInput(eventChan chan int) {
+func (game *Game) getKeyboardInput(eventChan chan KeyboardEvent) {
 	for {
 		ev := termbox.PollEvent()
 
 		if ev.Type == termbox.EventKey {
 			switch ev.Key {
 			case termbox.KeyCtrlC:
-				eventChan <- 1
+				eventChan <- Quit
 			case termbox.KeyArrowLeft:
-				eventChan <- 2
+				eventChan <- Left
 				//game.moveLeft()
 			case termbox.KeyArrowRight:
-				game.moveRight()
+				eventChan <- Right
+			case termbox.KeyArrowDown:
+				eventChan <- Drop
 			}
 
 			//game.out.WriteString(fmt.Sprintf("Event Key detected: ", ev.Ch))
@@ -56,18 +59,6 @@ type Game struct {
 	floorTop int8
 	floor    [10]int8
 	board    [20][10]int8
-}
-
-func (game Game) moveLeft() {
-	game.shapeLoc.x--
-}
-
-func (game Game) moveRight() {
-	game.shapeLoc.x++
-}
-
-func (game Game) drop() {
-
 }
 
 func (game Game) drawFrame() {
@@ -114,7 +105,7 @@ func main() {
 		board:    [20][10]int8{},
 	}
 
-	inputs := make(chan int)
+	inputs := make(chan KeyboardEvent)
 	go game.getKeyboardInput(inputs)
 
 	for {
@@ -127,9 +118,11 @@ func main() {
 				case x, ok := <-inputs:
 					if ok {
 						switch x {
-						case 1:
+						case Quit:
 							return
-						case 2:
+						case Left:
+							game.shapeLoc.x--
+						case Right:
 							game.shapeLoc.x++
 						}
 					}
