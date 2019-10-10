@@ -34,8 +34,6 @@ func (game *Game) getKeyboardInput(eventChan chan KeyboardEvent) {
 				eventChan <- Drop
 			}
 
-			//game.out.WriteString(fmt.Sprintf("Event Key detected: ", ev.Ch))
-			//game.out.Flush()
 		}
 	}
 }
@@ -53,12 +51,13 @@ type Shape interface {
 }
 
 type Game struct {
-	out      *bufio.Writer
-	shapeLoc Coord
-	shape    Shape
-	floorTop int8
-	floor    [10]int8
-	board    [20][10]int8
+	out         *bufio.Writer
+	shapeLoc    Coord
+	shape       Shape
+	floorTop    int8
+	floor       [10]int8
+	board       [20][10]int8
+	boardHeight int8
 }
 
 func (game Game) drawFrame() {
@@ -67,7 +66,7 @@ func (game Game) drawFrame() {
 	game.out.WriteString("+==========+\n")
 	for y, _ := range game.board {
 		y := int8(y)
-		if int8(y) < game.shapeLoc.y || (int8(y) > game.shapeLoc.y && y < game.floorTop) {
+		if y < game.shapeLoc.y {
 			game.out.WriteString("|          |\n")
 			continue
 		}
@@ -90,9 +89,17 @@ func (game Game) drawFrame() {
 	game.out.Flush()
 }
 
+//func (game Game) isSpaceBelow() {
+//	if
+
 func main() {
 	termbox.Init()
 	defer termbox.Close()
+
+	floor := [10]int8{}
+	for i := range floor {
+		floor[i] = 20
+	}
 
 	game := Game{
 		out: bufio.NewWriterSize(os.Stdout, 1000),
@@ -101,7 +108,7 @@ func main() {
 			y: 0,
 		},
 		floorTop: 0,
-		floor:    [10]int8{},
+		floor:    floor,
 		board:    [20][10]int8{},
 	}
 
@@ -111,7 +118,7 @@ func main() {
 	for {
 		for j := 0; j < 20; j++ {
 			game.drawFrame()
-			time.Sleep(time.Millisecond * 30)
+			time.Sleep(time.Millisecond * 10)
 
 			for {
 				select {
@@ -128,20 +135,16 @@ func main() {
 					}
 				default:
 					goto EndFor
-					//}
-					//input := <- inputs
-					//switch input{
-					//case 1:
-					//	return
-					//case 2:
-					//	game.shapeLoc.x++
-					//case
 				}
 			}
 		EndFor:
 		}
 
-		if game.shapeLoc.y < 19 {
+		if game.shapeLoc.y+1 == game.floor[game.shapeLoc.x] {
+			game.floor[game.shapeLoc.x]--
+			game.board[game.shapeLoc.y][game.shapeLoc.x] = 1
+			game.shapeLoc = Coord{0, 0}
+		} else {
 			game.shapeLoc.y++
 		}
 	}
