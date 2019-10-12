@@ -137,7 +137,7 @@ func main() {
 	for {
 		for j := 0; j < 20; j++ {
 			game.drawFrame()
-			time.Sleep(time.Millisecond * 10)
+			time.Sleep(time.Millisecond * 30)
 
 			for {
 				select {
@@ -156,7 +156,7 @@ func main() {
 							}
 						case Drop:
 							game.shapeLoc.y = game.floor[game.shapeLoc.x] - 1
-							goto EndFor
+							goto EndInputLoop
 						}
 					}
 				default:
@@ -165,6 +165,7 @@ func main() {
 			}
 		EndFor:
 		}
+	EndInputLoop:
 
 		if game.shapeLoc.y+1 == game.floor[game.shapeLoc.x] {
 			game.floor[game.shapeLoc.x]--
