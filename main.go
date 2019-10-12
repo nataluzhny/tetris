@@ -50,6 +50,21 @@ type Shape interface {
 	rotate()
 }
 
+type T struct {
+	rot [4][3][3]bool
+}
+
+type I struct {
+	rot [2][2]int
+}
+
+func makeT() I {
+	var myT = I{
+		rot: [2][2]int{}, //{{0, 0}, {1, 1}},
+	}
+	return myT
+}
+
 type Game struct {
 	out         *bufio.Writer
 	shapeLoc    Coord
@@ -66,10 +81,6 @@ func (game Game) drawFrame() {
 	game.out.WriteString("+==========+\n")
 	for y, _ := range game.board {
 		y := int8(y)
-		if y < game.shapeLoc.y {
-			game.out.WriteString("|          |\n")
-			continue
-		}
 
 		game.out.WriteString("|")
 		for x, element := range game.board[y] {
@@ -95,6 +106,14 @@ func (game Game) drawFrame() {
 func main() {
 	termbox.Init()
 	defer termbox.Close()
+
+	a := [3][4]int{
+		{1, 1, 1, 1},   /*  initializers for row indexed by 0 */
+		{4, 5, 6, 7},   /*  initializers for row indexed by 1 */
+		{8, 9, 10, 11}, /*  initializers for row indexed by 2 */
+	}
+
+	a[1][1] = 2
 
 	floor := [10]int8{}
 	for i := range floor {
@@ -128,9 +147,15 @@ func main() {
 						case Quit:
 							return
 						case Left:
-							game.shapeLoc.x--
+							if game.shapeLoc.x > 0 {
+								game.shapeLoc.x--
+							}
 						case Right:
-							game.shapeLoc.x++
+							if game.shapeLoc.x < 9 {
+								game.shapeLoc.x++
+							}
+						case Drop:
+							game.shapeLoc.y = game.floor[game.shapeLoc.x] - 1
 						}
 					}
 				default:
