@@ -156,6 +156,7 @@ func main() {
 							}
 						case Drop:
 							game.shapeLoc.y = game.floor[game.shapeLoc.x] - 1
+							goto EndFor
 						}
 					}
 				default:
