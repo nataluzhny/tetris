@@ -96,7 +96,18 @@ func (game Game) drawFrame() {
 		game.out.WriteString("|\n")
 	}
 
-	game.out.WriteString("+==========+\n")
+	// TODO How can we rewrite this without a loop?
+	game.out.WriteString("+")
+	for x, _ := range game.board[0] {
+		if x == int(game.shapeLoc.x) {
+			game.out.WriteString("=")
+		} else {
+			game.out.WriteString("-")
+		}
+	}
+	game.out.WriteString("+\n")
+	
+	
 	game.out.Flush()
 }
 
@@ -170,7 +181,7 @@ func main() {
 		if game.shapeLoc.y+1 == game.floor[game.shapeLoc.x] {
 			game.floor[game.shapeLoc.x]--
 			game.board[game.shapeLoc.y][game.shapeLoc.x] = 1
-			game.shapeLoc = Coord{0, 0}
+			game.shapeLoc = Coord{game.shapeLoc.x, 0}
 		} else {
 			game.shapeLoc.y++
 		}
