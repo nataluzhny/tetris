@@ -1,0 +1,1 @@
+Tetris for the terminal. We've been working on it in our spare time for fun and to improve our Golang skills, but it is very much incomplete at the moment. Check back in a few months and hopefully there'll be a game for you to play!
